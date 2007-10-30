@@ -59,8 +59,10 @@ public class EvalClassifier {
 					+ (target == actual ? "YES" : "NO"));
 
 		}
+		double accuracy = NumofRight/2803.0;
 		System.out
-				.println("Correct :" + NumofRight + " , Wrong :" + NumofWrong);
+				.println("Correct :" + NumofRight + " , Wrong :" 
+								+ NumofWrong +  " Accuracy = " + accuracy  );
 	}
 
 	public static void main(String[] args) {

@@ -34,12 +34,12 @@ public class MNN implements Serializable {
 	 */
 	public MNN(int nInput, int nOutput, int epochs, int seed) {
 		// allocate space for node and weight values
-		y = new double[epochs];
-		y1 = new double[nOutput];
-		w = new double[epochs][nInput];
-		dw = new double[epochs][nInput];
-		w1 = new double[nOutput][epochs];
-		dw1 = new double[nOutput][epochs];
+		y = new double[epochs];		// hidden layer nodes	
+		y1 = new double[nOutput];	// output layer nodes
+		w = new double[epochs][nInput];		//input layer nodes
+		dw = new double[epochs][nInput];	//input layer D weight
+		w1 = new double[nOutput][epochs];	//hidden layer weight
+		dw1 = new double[nOutput][epochs];	//hidden layer D weight
 		System.out.println(" hidden layer: Input :  [" + nInput
 				+ "],  Output : [" + epochs + "]");
 		System.out.println(" Output layer: Input :  [" + epochs
@@ -49,7 +49,7 @@ public class MNN implements Serializable {
 		bias1 = new double[nOutput];
 
 		// initialize weight and bias values
-		rand = new Random(seed); // hidden layer
+		rand = new Random(seed); // input layer
 		for (int j = 0; j < epochs; j++) {
 			for (int i = 0; i < nInput; i++) {
 				w[j][i] = rand.nextGaussian() * .1;
@@ -57,7 +57,7 @@ public class MNN implements Serializable {
 			bias[j] = rand.nextGaussian() * .1;
 		}
 
-		rand = new Random(seed); // output layer
+		rand = new Random(seed); // hidden layer
 		for (int j = 0; j < nOutput; j++) {
 			for (int i = 0; i < epochs; i++) {
 				w1[j][i] = rand.nextGaussian() * .1;
@@ -137,24 +137,39 @@ public class MNN implements Serializable {
 	 *            value, e.g. 0.1
 	 * @return double An error value (the root-mean-squared-error).
 	 */
-	public double train(double[] x, double[] d, double[] d1, double eta) {
+	public double train(double[] x, double[] d, double[] d1, double eta) 
+	{
 
 		// present the input and calculate the outputs
 		BPfeedforward(x);
 
 		// allocate space for errors of individual nodes
 		double[] error1 = new double[y1.length];
+		double[] error = new double[y.length];
 
 		// compute the error of output nodes (explicit target is available -- so
 		// quite simple)
 		// also, calculate the root-mean-squared-error to indicate progress
 		double rmse1 = 0;
-		for (int j = 0; j < y1.length; j++) {
+		for (int j = 0; j < y1.length; j++) 
+		{
 			double diff1 = d1[j] - y1[j];
 			error1[j] = diff1 * outputFunctionDerivative(y1[j]);
 			rmse1 += diff1 * diff1;
 		}
 		rmse1 = Math.sqrt(rmse1 / y1.length);
+
+		for (int j = 0; j < y.length; j++)
+		{
+			double sum = 0;
+			for (int i = 0; i < y1.length; i++)
+			{
+				double diff = error1[i];
+				sum += w1[i][j] * diff;
+			}
+			error[j] = outputFunctionDerivative(y[j]) * sum;
+		}
+
 
 		// change weights according to errors
 
@@ -167,9 +182,21 @@ public class MNN implements Serializable {
 												// always 1.0.
 		}
 
-		// BP
+		for (int j = 0; j < y.length; j++)
+		{
+			for (int i = 0; i < x.length; i++)
+			{
+				w[j][i] += error[j] * x[i] * eta;
+			}
+			bias[j] += error[j] * 1.0 * eta; // bias can be understood as a
+			// weight from a node which is
+			// always 1.0.
+		}
 
-		double[] error = new double[y.length];
+
+		// BP
+		/*
+		
 		for (int j = 0; j < y.length; j++) {
 			double diff = 0;
 			for (int i = 0; i < y1.length; i++) {
@@ -211,7 +238,7 @@ public class MNN implements Serializable {
 				w1[j][i] += eta * err * out + 0.9 * dweight;
 				dw1[j][i] = eta * err * out;
 			}
-		}
+		}*/
 
 		return rmse1;
 	}
