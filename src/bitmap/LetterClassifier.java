@@ -3,7 +3,6 @@ package bitmap;
 import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
-import java.util.Iterator;
 import java.util.Vector;
 
 /**
@@ -67,7 +66,7 @@ public class LetterClassifier extends Classifier {
 	 * @throws IOException
 	 *             if the file operation fails
 	 */
-	public static ClassifiedBitmap[] loadLetters(String filename)
+	public static Vector<ClassifiedBitmap> loadLetters(String filename)
 			throws IOException {
 		Vector<ClassifiedBitmap> bmaps = new Vector<ClassifiedBitmap>();
 		BufferedReader reader = new BufferedReader(new FileReader(filename));
@@ -83,11 +82,8 @@ public class LetterClassifier extends Classifier {
 			}
 			line = reader.readLine();
 		}
-		ClassifiedBitmap[] bitmaps = new ClassifiedBitmap[bmaps.size()];
-		Iterator<ClassifiedBitmap> iter = bmaps.iterator();
-		for (int i = 0; iter.hasNext(); i++)
-			bitmaps[i] = iter.next();
-		return bitmaps;
+		
+		return bmaps;
 	}
 
 }

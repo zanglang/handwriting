@@ -2,6 +2,7 @@ package bitmap;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.Vector;
 
 /**
  * This program trains a classifier and saves it in a file to be read when used.
@@ -20,7 +21,7 @@ public class TrainClassifier {
 
 		// load data
 		try {
-			ClassifiedBitmap[] bitmaps = LetterClassifier.loadLetters(args[1]);
+			Vector<ClassifiedBitmap> bitmaps = LetterClassifier.loadLetters(args[1]);
 			// train it using all available training data
 			c.train(bitmaps, 100000, 0.01);
 			// c.train(bitmaps);
@@ -46,13 +47,12 @@ public class TrainClassifier {
 		catch (Exception e) {}
 		
 		if (Mc == null)
-			Mc = new MNNClassifier(32, 32);// new MNN classifier
+			Mc = new MNNClassifier(32, 32, 0.1);// new MNN classifier
 		System.out.println("Classifer created!");
 
 		try {
-			ClassifiedBitmap[] bitmaps = LetterClassifier.loadLetters(args[1]);
-			// TODO: this was 100000
-			Mc.train(bitmaps, 10000, 0.1);
+			Vector<ClassifiedBitmap> bitmaps = LetterClassifier.loadLetters(args[1]);
+			Mc.train(bitmaps, 100000);
 		} catch (IOException ex) {
 			System.err.println("Error loading data.txt: " + ex.getMessage());
 		}

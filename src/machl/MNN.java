@@ -48,7 +48,7 @@ public class MNN implements Serializable {
 		bias = new double[epochs];
 		bias1 = new double[nOutput];
 
-		// initialize weight and bias values
+		// Initialise weight and bias values
 		rand = new Random(seed); // input layer
 		for (int j = 0; j < epochs; j++) {
 			for (int i = 0; i < nInput; i++) {
@@ -137,7 +137,7 @@ public class MNN implements Serializable {
 	 *            value, e.g. 0.1
 	 * @return double An error value (the root-mean-squared-error).
 	 */
-	public double train(double[] x, double[] d, double[] d1, double eta) 
+	public double train(double[] x, double[] d1, double eta) 
 	{
 
 		// present the input and calculate the outputs
@@ -176,6 +176,8 @@ public class MNN implements Serializable {
 		for (int j = 0; j < y1.length; j++) {
 			for (int i = 0; i < y.length; i++) {
 				w1[j][i] += error1[j] * y[i] * eta;
+				// TODO: Currently unused
+				//dw1[j][i] = error1[j] * y[i] * eta;
 			}
 			bias1[j] += error1[j] * 1.0 * eta; // bias can be understood as a
 												// weight from a node which is

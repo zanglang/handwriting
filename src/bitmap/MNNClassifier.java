@@ -1,8 +1,10 @@
 package bitmap;
 
 import java.util.Random;
+import java.util.Vector;
 
 import machl.MNN;
+import machl.MNN2;
 
 public class MNNClassifier extends LetterClassifier {
 	/**
@@ -10,10 +12,8 @@ public class MNNClassifier extends LetterClassifier {
 	 */
 	private static final long serialVersionUID = 881205967028950511L;
 	private static String name = "MNN Classifier ";
-	private MNN nn = null;
-	private Random rand;
-	private double[][] targets = null; // target vectors;
-	private double[][] targets1 = null;
+	private MNN2 nn = null;
+	private double[][] targets = null;
 
 	/**
 	 * Identifies the classifier, e.g. by the name of the author/contender, or
@@ -33,7 +33,7 @@ public class MNNClassifier extends LetterClassifier {
 	 * @return the probabilities of all the classes (should add up to 1).
 	 */
 	public double[] test(Bitmap map) {
-		double[] out = nn.BPfeedforward(map.toDoubleArray());
+		double[] out = nn.feedForward(map.toDoubleArray());
 		return out;
 	}
 
@@ -41,42 +41,33 @@ public class MNNClassifier extends LetterClassifier {
 	 * Trains the neural network classifier on randomly picked samples from
 	 * specified training data.
 	 * 
-	 * @param maps
+	 * @param bitmaps
 	 *            the bitmaps which are used as training inputs including
 	 *            targets
 	 * @param nPresentations
 	 *            the number of samples to present
-	 * @param eta
-	 *            the learning rate
 	 */
-	public void train(ClassifiedBitmap[] maps, int epochs, double eta) {
+	public void train(Vector<ClassifiedBitmap> bitmaps, int epochs) {
+		Random rand = new Random();
 		for (int p = 0; p < epochs; p++) {
-			int sample = rand.nextInt(maps.length);
-			nn.train(((Bitmap) maps[sample]).toDoubleArray(),
-					targets[maps[sample].getTarget()],
-					targets1[maps[sample].getTarget()],
-					eta);
+			int sample = rand.nextInt(bitmaps.size());
+			nn.train((bitmaps.get(sample)).toDoubleArray(),
+					targets[bitmaps.get(sample).getTarget()]);
 		}
 	}
 
 	/**
 	 * Construct a neural network classifier for bitmaps of specified size.
 	 * 
-	 * @param nRows
-	 *            number of rows in the bitmap
-	 * @param nCols
-	 *            number of columns in the bitmap
+	 * @param nRows - number of rows in the bitmap
+	 * @param nCols - number of columns in the bitmap
+	 * @param eta - the learning rate
 	 */
-	public MNNClassifier(int nRows, int nCols) {
-		rand = new Random(System.currentTimeMillis());
-		nn = new MNN(nRows * nCols, getClassCount(), 100, rand.nextInt());
+	public MNNClassifier(int nRows, int nCols, double eta) {
+		nn = new MNN2(nRows * nCols, getClassCount(), 150, eta);
 		
-		targets = new double[100][100];
-		for (int c = 0; c < 100; c++)
-			targets[c][c] = 1;
-		
-		targets1 = new double[getClassCount()][getClassCount()];
+		targets = new double[getClassCount()][getClassCount()];
 		for (int c = 0; c < getClassCount(); c++)
-			targets1[c][c] = 1;
+			targets[c][c] = 1;
 	}
 }

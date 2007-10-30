@@ -1,15 +1,12 @@
 package bitmap;
 
-import java.util.StringTokenizer;
 
 /**
  * <p>
  * A subclass of Bitmap and extends it by adding a classification (a target
  * class).
  * </p>
- * 
- * @author Mikael Boden
- * @version 1.0
+ * @version 1.1
  */
 
 public class ClassifiedBitmap extends Bitmap {
@@ -17,51 +14,26 @@ public class ClassifiedBitmap extends Bitmap {
 	private int targetClass;
 
 	/**
-	 * Construct the instance to be of a specified size and attach a
-	 * classification to it.
-	 * 
-	 * @param nRows
-	 *            number of rows
-	 * @param nCols
-	 *            number of columns
-	 * @param targetClass
-	 *            the classification of the bitmap
-	 */
-	public ClassifiedBitmap(int nRows, int nCols, int targetClass) {
-		super(nRows, nCols);
-		this.targetClass = targetClass;
-	}
-
-	/**
-	 * <p>
-	 * Construct the instance from a String specification.
-	 * </p>
-	 * Format:
+	 * Construct the instance from a String specification. Format:
 	 * <p>
 	 * nRows nCols value_row_1_col_1 value_row_1_col_2 ...
 	 * value_row_nRows_col_nCols classification
 	 * </p>
 	 * 
-	 * @param spec
-	 *            a text string specifying the bitmap and it's classification
+	 * @param spec a text string specifying the bitmap and it's classification
 	 */
 	public ClassifiedBitmap(String spec) {
 		super(spec);
-		StringTokenizer tok = new StringTokenizer(spec, " \t,");
-		String token = null;
-		for (int t = 0; tok.hasMoreTokens(); t++)
-			token = tok.nextToken();
 		try {
-			targetClass = Integer.parseInt(token);
+			targetClass = Integer.parseInt(spec.substring(spec.lastIndexOf(" ") + 1));
 		} catch (NumberFormatException ex) {
 			throw new RuntimeException(
-					"Classification of bitmap is not correctly specified: "
-							+ spec);
+					"Classification of bitmap is not correctly specified: " + spec);
 		}
 	}
 
 	/**
-	 * Detrmine the target classification
+	 * Determine the target classification
 	 * 
 	 * @return the target classification for this bitmap
 	 */

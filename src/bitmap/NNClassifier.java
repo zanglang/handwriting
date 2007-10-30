@@ -1,6 +1,7 @@
 package bitmap;
 
 import java.util.Random;
+import java.util.Vector;
 
 import machl.NN1;
 
@@ -51,7 +52,7 @@ public class NNClassifier extends LetterClassifier {
 	 * Trains the neural network classifier on randomly picked samples from
 	 * specified training data.
 	 * 
-	 * @param maps
+	 * @param bitmaps
 	 *            the bitmaps which are used as training inputs including
 	 *            targets
 	 * @param nPresentations
@@ -59,11 +60,11 @@ public class NNClassifier extends LetterClassifier {
 	 * @param eta
 	 *            the learning rate
 	 */
-	public void train(ClassifiedBitmap[] maps, int nPresentations, double eta) {
+	public void train(Vector<ClassifiedBitmap> bitmaps, int nPresentations, double eta) {
 		for (int p = 0; p < nPresentations; p++) {
-			int sample = rand.nextInt(maps.length);
-			nn1.train(((Bitmap) maps[sample]).toDoubleArray(),
-					targets[maps[sample].getTarget()], eta);
+			int sample = rand.nextInt(bitmaps.size());
+			nn1.train(((Bitmap) bitmaps.get(sample)).toDoubleArray(),
+					targets[bitmaps.get(sample).getTarget()], eta);
 		}
 	}
 
