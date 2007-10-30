@@ -1,5 +1,6 @@
 package bitmap;
 
+import java.io.File;
 import java.io.IOException;
 
 /**
@@ -35,11 +36,23 @@ public class TrainClassifier {
 	}
 
 	public static void MNNTrainClassifier(String[] args) {
-		MNNClassifier Mc = new MNNClassifier(32, 32);// new MNN classifier
+		
+		MNNClassifier Mc = null;
+		
+		try {
+			if ((new File(args[0])).exists())
+				Mc = (MNNClassifier)Classifier.load(args[0]);
+		}
+		catch (Exception e) {}
+		
+		if (Mc == null)
+			Mc = new MNNClassifier(32, 32);// new MNN classifier
+		System.out.println("Classifer created!");
 
 		try {
 			ClassifiedBitmap[] bitmaps = LetterClassifier.loadLetters(args[1]);
-			Mc.train(bitmaps, 100000, 0.01);
+			// TODO: this was 100000
+			Mc.train(bitmaps, 10000, 0.1);
 		} catch (IOException ex) {
 			System.err.println("Error loading data.txt: " + ex.getMessage());
 		}

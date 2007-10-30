@@ -53,8 +53,9 @@ public class MNNClassifier extends LetterClassifier {
 		for (int p = 0; p < epochs; p++) {
 			int sample = rand.nextInt(maps.length);
 			nn.train(((Bitmap) maps[sample]).toDoubleArray(),
-					targets[maps[sample].getTarget()], targets1[maps[sample]
-							.getTarget()], eta);
+					targets[maps[sample].getTarget()],
+					targets1[maps[sample].getTarget()],
+					eta);
 		}
 	}
 
@@ -69,9 +70,11 @@ public class MNNClassifier extends LetterClassifier {
 	public MNNClassifier(int nRows, int nCols) {
 		rand = new Random(System.currentTimeMillis());
 		nn = new MNN(nRows * nCols, getClassCount(), 100, rand.nextInt());
+		
 		targets = new double[100][100];
 		for (int c = 0; c < 100; c++)
 			targets[c][c] = 1;
+		
 		targets1 = new double[getClassCount()][getClassCount()];
 		for (int c = 0; c < getClassCount(); c++)
 			targets1[c][c] = 1;
