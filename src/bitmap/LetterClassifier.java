@@ -82,5 +82,11 @@ public class LetterClassifier extends Classifier {
 		
 		return bmaps;
 	}
-
+	
+	/**
+	 * Abstract implementation for child classifier classes
+	 * @param bitmaps List of bitmaps to train
+	 * @param epochs Number of iterations to train
+	 */
+	public void train(Vector<ClassifiedBitmap> bitmaps, int epochs) {}
 }

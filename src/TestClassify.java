@@ -1,6 +1,7 @@
 import java.util.Vector;
 
 import bitmap.ClassifiedBitmap;
+import bitmap.ClassifierType;
 import bitmap.EnsembleClassifier;
 import bitmap.EvalClassifier;
 import bitmap.LetterClassifier;
@@ -9,7 +10,7 @@ public class TestClassify {
 
 	public static void main(String[] args) throws Exception {
 		
-		EnsembleClassifier mc = new EnsembleClassifier(32, 32, 0.1);
+		EnsembleClassifier mc = new EnsembleClassifier(ClassifierType.MNN, 32, 32, 0.1);
 		Vector<ClassifiedBitmap> bitmaps = LetterClassifier.loadLetters("train");
 		
 		System.out.println("Bitmaps: " + bitmaps.size());

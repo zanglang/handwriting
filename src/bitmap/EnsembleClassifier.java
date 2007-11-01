@@ -11,7 +11,7 @@ public class EnsembleClassifier extends LetterClassifier {
 	private static int HYPOTHESES_NUM = 5;
 	
 	// main hypotheses
-	private MNNClassifier[] classifiers;
+	private LetterClassifier[] classifiers;
 	public double rmse;
 
 	public String getName() {
@@ -25,7 +25,7 @@ public class EnsembleClassifier extends LetterClassifier {
 		
 		// gather results from ensemble
 		int i = 0;
-		for (MNNClassifier classifier : classifiers) {
+		for (LetterClassifier classifier : classifiers) {
 			results[i] = classifier.test(map);			
 			i++;
 		}
@@ -48,7 +48,7 @@ public class EnsembleClassifier extends LetterClassifier {
 		Random rand = new Random();
 		
 		// train each classifier on a subset of data
-		for (MNNClassifier classifier : classifiers) {
+		for (LetterClassifier classifier : classifiers) {
 			
 			// calculate random subset
 			int setStart = rand.nextInt(bitmaps.size() - setSize);
@@ -59,10 +59,17 @@ public class EnsembleClassifier extends LetterClassifier {
 		}
 	}
 
-	public EnsembleClassifier(int nRows, int nCols, double eta) {
+	public EnsembleClassifier(ClassifierType type, int nRows, int nCols, double eta) {
 		
 		// initial hypothesis
 		for (int i = 0; i < HYPOTHESES_NUM; i++)
-			classifiers[i] = new MNNClassifier(nRows, nCols, eta);
+			switch (type) {
+			case MNN:
+				classifiers[i] = new MNNClassifier(nRows, nCols, eta);
+			case NN1:
+				classifiers[i] = new NNClassifier(nRows, nCols);
+			case ID3:
+				classifiers[i] = new ID3Classifier(nRows, nCols);
+			}
 	}
 }
