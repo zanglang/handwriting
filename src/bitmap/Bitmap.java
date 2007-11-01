@@ -2,13 +2,15 @@ package bitmap;
 
 import java.util.StringTokenizer;
 
+import machl.Config;
+
 /**
  * <p>
  * A Bitmap holds a matrix of bits (true or false, on or off, 1 or 0).
  * </p>
  * 
  * @author Mikael Boden
- * @version 1.0
+ * @version 1.1
  */
 
 public class Bitmap {
@@ -47,6 +49,8 @@ public class Bitmap {
 			throw new RuntimeException(
 					"Bitmap is not correctly specified. Incorrect row and column number: "
 							+ spec);
+		
+		boolean[][] tempMap;
 		try {
 			int nRows = Integer.parseInt(tok.nextToken());
 			int nCols = Integer.parseInt(tok.nextToken());
@@ -55,14 +59,50 @@ public class Bitmap {
 						"Bitmap is not correctly specified. Insufficient number of bits: "
 								+ spec);
 			map = new boolean[nRows][nCols];
+			tempMap = new boolean[nRows][nCols];
+
 			for (int r = 0; r < map.length; r++)
 				for (int c = 0; c < map[r].length; c++)
-					map[r][c] = (Integer.parseInt(tok.nextToken()) == 1 ? true
+					tempMap[r][c] = (Integer.parseInt(tok.nextToken()) == 1 ? true
 							: false);
 		} catch (NumberFormatException ex) {
 			throw new RuntimeException(
 					"Bitmap is not correctly specified. Bits not correctly formatted: "
 							+ spec);
+		}
+
+		if (Config.BITMAP_CENTERING) {
+			// apply centering algorithm
+			int top = 31, left = 31, right = 0, bottom = 0;
+			int adjustX, adjustY;
+	
+			for (int i = 0; i < 32; i++) {
+				for (int j = 0; j < 32; j++) {
+					if (tempMap[i][j]) {
+						if (i < top)
+							top = i;
+						else if (i > bottom)
+							bottom = i;
+	
+						if (j < left)
+							left = j;
+						else if (j > right)
+							right = j;
+					}
+				}
+			}
+	
+			adjustX = 15 - (left + right) / 2;
+			adjustY = 15 - (top + bottom) / 2;
+			//System.out.println(top + "--" + bottom + "--" + left + "--" + right);
+			//System.out.println(adjustX + "--" + adjustY);
+	
+			for (int x = right; x >= left; x--) {
+				for (int y = bottom; y >= top; y--) {
+					if (tempMap[x][y])
+						map[y + adjustY][x + adjustX] = true;
+				}
+			}
 		}
 	}
 

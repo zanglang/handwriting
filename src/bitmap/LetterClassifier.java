@@ -63,7 +63,7 @@ public class LetterClassifier extends Classifier {
 	 * @throws IOException
 	 *             if the file operation fails
 	 */
-	public static Vector<ClassifiedBitmap> loadLetters(String filename)
+	public static ClassifiedBitmap[] loadLetters(String filename)
 			throws IOException {
 		Vector<ClassifiedBitmap> bmaps = new Vector<ClassifiedBitmap>();
 		BufferedReader reader = new BufferedReader(new FileReader(filename));
@@ -74,19 +74,22 @@ public class LetterClassifier extends Classifier {
 				bmap = new ClassifiedBitmap(line);
 				bmaps.add(bmap);
 			} catch (RuntimeException ex) {
-				; // the line does not conform to the Bitmap format or does
-					// not specify the target class correctly
+				// the line does not conform to the Bitmap format or does
+				// not specify the target class correctly
+				System.out.println(ex.getMessage());
 			}
 			line = reader.readLine();
 		}
 		
-		return bmaps;
+		return bmaps.toArray(new ClassifiedBitmap[1]);
 	}
 	
 	/**
-	 * Abstract implementation for child classifier classes
-	 * @param bitmaps List of bitmaps to train
-	 * @param epochs Number of iterations to train
+	 * Abstract implementation of training function
+	 * @param bitmaps Bitmap containing letter to train
+	 * @param epochs Number of training iterations
+	 * @return Mean squared error rate of training
 	 */
-	public void train(Vector<ClassifiedBitmap> bitmaps, int epochs) {}
+	public double train(ClassifiedBitmap[] bitmaps, int epochs) { return 0.0; }
+
 }

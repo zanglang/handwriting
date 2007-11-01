@@ -1,8 +1,8 @@
 package bitmap;
 
-import java.util.List;
 import java.util.Random;
-import java.util.Vector;
+
+import machl.Config;
 
 public class EnsembleClassifier extends LetterClassifier {
 	
@@ -40,32 +40,39 @@ public class EnsembleClassifier extends LetterClassifier {
 		return out;
 	}
 
-	public void train(Vector<ClassifiedBitmap> bitmaps, int epochs) {
+	/**
+	 * Train on bitmap using the classifier ensembles
+	 * @return Lowest root mean squared error achieved.
+	 */
+	public double train(ClassifiedBitmap[] bitmaps, int epochs) {
 		
-		
-		
-		int setSize = bitmaps.size() / 10;	// TODO: experimental size
+		int setSize = bitmaps.length / 10;
 		Random rand = new Random();
+		double rmse = 1.0;
 		
 		// train each classifier on a subset of data
 		for (LetterClassifier classifier : classifiers) {
 			
 			// calculate random subset
-			int setStart = rand.nextInt(bitmaps.size() - setSize);
-			List<ClassifiedBitmap> subset = bitmaps.subList(setStart, setStart + setSize);
+			int setStart = rand.nextInt(bitmaps.length - setSize);
+			ClassifiedBitmap[] subset = new ClassifiedBitmap[setSize];
+			System.arraycopy(bitmaps, setStart, subset, 0, setSize);
 			
 			// train classifiers on subset to n number of epochs
-			classifier.train(new Vector<ClassifiedBitmap>(subset), epochs);
+			double rmse2 = classifier.train(subset, epochs);
+			if (rmse2 < rmse) rmse = rmse2;
 		}
+		
+		return rmse;
 	}
 
-	public EnsembleClassifier(ClassifierType type, int nRows, int nCols, double eta) {
+	public EnsembleClassifier(ClassifierType type, int nRows, int nCols) {
 		
 		// initial hypothesis
 		for (int i = 0; i < HYPOTHESES_NUM; i++)
 			switch (type) {
 			case MNN:
-				classifiers[i] = new MNNClassifier(nRows, nCols, eta);
+				classifiers[i] = new MNNClassifier(nRows, nCols, Config.LEARNING_RATE);
 			case NN1:
 				classifiers[i] = new NNClassifier(nRows, nCols);
 			case ID3:

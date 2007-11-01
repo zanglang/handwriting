@@ -1,7 +1,6 @@
 package bitmap;
 
 import java.util.Random;
-import java.util.Vector;
 
 import machl.NN1;
 
@@ -17,9 +16,6 @@ import machl.NN1;
 
 public class NNClassifier extends LetterClassifier {
 
-	/**
-	 * 
-	 */
 	private static final long serialVersionUID = -1353674596240113083L;
 	private static String name = "NN Classifier 1";
 	private NN1 nn1 = null;
@@ -60,11 +56,11 @@ public class NNClassifier extends LetterClassifier {
 	 * @param eta
 	 *            the learning rate
 	 */
-	public void train(Vector<ClassifiedBitmap> bitmaps, int nPresentations, double eta) {
+	public void train(ClassifiedBitmap[] bitmaps, int nPresentations, double eta) {
 		for (int p = 0; p < nPresentations; p++) {
-			int sample = rand.nextInt(bitmaps.size());
-			nn1.train(((Bitmap) bitmaps.get(sample)).toDoubleArray(),
-					targets[bitmaps.get(sample).getTarget()], eta);
+			int sample = rand.nextInt(bitmaps.length);
+			nn1.train(((Bitmap) bitmaps[sample]).toDoubleArray(),
+					targets[bitmaps[sample].getTarget()], eta);
 		}
 	}
 

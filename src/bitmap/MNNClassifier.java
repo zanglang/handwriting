@@ -1,17 +1,15 @@
 package bitmap;
 
 import java.util.Random;
-import java.util.Vector;
 
-import machl.MNN2;
+import machl.MNN;
 
 public class MNNClassifier extends LetterClassifier {
 
 	private static final long serialVersionUID = 881205967028950511L;
 	private static String name = "MNN Classifier ";
-	private MNN2 nn = null;
+	private MNN nn = null;
 	private double[][] targets = null;
-	public double rmse;
 
 	/**
 	 * Identifies the classifier, e.g. by the name of the author/contender, or
@@ -44,28 +42,52 @@ public class MNNClassifier extends LetterClassifier {
 	 *            targets
 	 * @param nPresentations
 	 *            the number of samples to present
+	 * @return Root mean squared error rate
 	 */
-	public void train(Vector<ClassifiedBitmap> bitmaps, int epochs) {
+	public double train(ClassifiedBitmap[] bitmaps, int nPresentations) {
+		
 		Random rand = new Random();
-		for (int p = 0; p < epochs; p++) {
-			int sample = rand.nextInt(bitmaps.size());
-			rmse = nn.train((bitmaps.get(sample)).toDoubleArray(),
-					targets[bitmaps.get(sample).getTarget()]);
+		double rmse = 0.0;
+		
+		for (int p = 0; p < nPresentations; p++) {
+			int sample = rand.nextInt(bitmaps.length);
+			rmse += nn.train((bitmaps[sample]).toDoubleArray(),
+					targets[bitmaps[sample].getTarget()]);
+
 		}
+		
+		return rmse / nPresentations;
 	}
 
 	/**
 	 * Construct a neural network classifier for bitmaps of specified size.
 	 * 
-	 * @param nRows - number of rows in the bitmap
-	 * @param nCols - number of columns in the bitmap
-	 * @param eta - the learning rate
+	 * @param nRows -
+	 *            number of rows in the bitmap
+	 * @param nCols -
+	 *            number of columns in the bitmap
+	 * @param eta -
+	 *            the learning rate
 	 */
 	public MNNClassifier(int nRows, int nCols, double eta) {
-		nn = new MNN2(nRows * nCols, getClassCount(), 150, eta);
-		
+		nn = new MNN(nRows * nCols, getClassCount(), 150, eta);
 		targets = new double[getClassCount()][getClassCount()];
 		for (int c = 0; c < getClassCount(); c++)
 			targets[c][c] = 1;
+
+	}
+
+	/**
+	 * Store changes to Classifier weights in neurons
+	 */
+	public void save() {
+		nn.saveWeight();
+	}
+
+	/**
+	 * Restores changes to Classifier weights in neurons
+	 */
+	public void restore() {
+		nn.restoreWeight();
 	}
 }

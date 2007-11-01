@@ -1,69 +1,89 @@
 package machl;
 
 import java.io.Serializable;
+import java.util.Arrays;
 import java.util.Random;
 
+/**
+ * Multi-layer backpropagation neural network implementation
+ * @author Jie Li and Zhe Wei Chong
+ */
 public class MNN implements Serializable {
 
-	/**
-	 * 
-	 */
 	private static final long serialVersionUID = -1546867093821601903L;
-	double[] y; // the values produced by each node (indices important, see
-				// weights/biases)
-	double[] y1;
-	public double[][] w; // the trainable weight values [to node][from input]
-	public double[][] w1;
-	public double[] bias; // the trainable bias values for nodes
-	public double[] bias1;
-	public double[][] dw;
-	public double[][] dw1;
-	Random rand; // a random number generator for initial weight values
+	private static double MOMENTUM_FACTOR = 0.9;
+	
+	// array for storing node values
+	private double[] nodesHidden;
+	private double[] nodesOutput;
+
+	// node weights
+	private double[][] inputWeight; // from input to hidden
+	private double[][] hiddenWeight; // from hidden to output
+	
+	private double[][] inputWeightChange;
+	private double[][] hiddenWeightChange;
+
+	private double[] outputBias; // output nodes bias
+	private double[] hiddenBias; // hidden nodes bias
+	
+	private double[][] saveInputWeight;	// save input layer weight
+	private double[][] saveHiddenWeight;// save hidden layer weight
+	
+	
+	private double learningRate;
 
 	/**
-	 * Constructs a neural network structure and initializes weights to small
+	 * Constructs a neural network structure and initialises weights to small
 	 * random values.
 	 * 
-	 * @param nInput
-	 *            Number of input nodes
-	 * @param nOutput
-	 *            Number of output nodes
-	 * @param seed
-	 *            Seed for the random number generator used for initial weights.
-	 * 
+	 * @param nInput - Number of input nodes
+	 * @param nOutput - Number of output nodes
+	 * @param seed - Seed for the random number generator used for initial weights.
 	 */
-	public MNN(int nInput, int nOutput, int epochs, int seed) {
-		// allocate space for node and weight values
-		y = new double[epochs];		// hidden layer nodes	
-		y1 = new double[nOutput];	// output layer nodes
-		w = new double[epochs][nInput];		//input layer nodes
-		dw = new double[epochs][nInput];	//input layer D weight
-		w1 = new double[nOutput][epochs];	//hidden layer weight
-		dw1 = new double[nOutput][epochs];	//hidden layer D weight
-		System.out.println(" hidden layer: Input :  [" + nInput
-				+ "],  Output : [" + epochs + "]");
-		System.out.println(" Output layer: Input :  [" + epochs
-				+ "],  Output : [" + nOutput + "]");
+	public MNN(int input, int output, int hidden, double eta) {
 
-		bias = new double[epochs];
-		bias1 = new double[nOutput];
+		nodesHidden = new double[hidden]; // hidden layer nodes
+		nodesOutput = new double[output]; // output layer nodes
 
-		// Initialise weight and bias values
-		rand = new Random(seed); // input layer
-		for (int j = 0; j < epochs; j++) {
-			for (int i = 0; i < nInput; i++) {
-				w[j][i] = rand.nextGaussian() * .1;
-			}
-			bias[j] = rand.nextGaussian() * .1;
+		inputWeight = new double[input][hidden]; // input layer weight
+		hiddenWeight = new double[hidden][output]; // hidden layer weight
+		
+		saveInputWeight = new double[input][hidden];  // save input layer weight
+		saveHiddenWeight = new double[hidden][output]; // save hidden layer weight
+				
+		inputWeightChange = new double[input][hidden]; // input layer weight momentum
+		hiddenWeightChange = new double[hidden][output]; // hidden layer weight momentum
+
+		System.out.println(" hidden layer:" +
+				"Input :  " + "[" + input + "],  " +
+				"Output : [" + hidden + "]");
+		System.out.println(" Output layer: " +
+				"Input :  [" + hidden + "],  " +
+				"Output : [" + output + "]");
+
+		hiddenBias = new double[hidden];
+		outputBias = new double[output];
+
+		// the main seed
+		Random rand = new Random(System.currentTimeMillis());
+		
+		// initialise weight for input nodes, and bias for hidden nodes
+		for (int j = 0; j < hidden; j++) {
+			for (int i = 0; i < input; i++)
+				inputWeight[i][j] = rand.nextGaussian() * .1;
+			// TODO: experiment with +1/-1
+			hiddenBias[j] = rand.nextGaussian() * .1;
 		}
 
-		rand = new Random(seed); // hidden layer
-		for (int j = 0; j < nOutput; j++) {
-			for (int i = 0; i < epochs; i++) {
-				w1[j][i] = rand.nextGaussian() * .1;
-			}
-			bias1[j] = rand.nextGaussian() * .1;
+		// initialise weight for hidden nodes, and bias for output nodes
+		for (int j = 0; j < output; j++) {
+			for (int i = 0; i < hidden; i++)
+				hiddenWeight[i][j] = rand.nextGaussian() * .1;
+			outputBias[j] = rand.nextGaussian() * .1;
 		}
+		
+		this.learningRate = eta;
 	}
 
 	/**
@@ -72,8 +92,7 @@ public class MNN implements Serializable {
 	 * differentiable. This one is called the logistic function (a sigmoid) and
 	 * produces values bounded between 0 and 1.
 	 * 
-	 * @param net
-	 *            The summed incoming activation
+	 * @param net - The summed incoming activation
 	 * @return double
 	 */
 	public double outputFunction(double net) {
@@ -83,11 +102,10 @@ public class MNN implements Serializable {
 	/**
 	 * The derivative of the output function. This one is the derivative of the
 	 * logistic function which is efficiently computed with respect to the
-	 * output value (if you prefer computing it wrt the net value you can do so
+	 * output value (if you prefer computing it with the net value you can do so
 	 * but it requires more computing power.
 	 * 
-	 * @param x
-	 *            The value by which the gradient is determined.
+	 * @param x - The value by which the gradient is determined.
 	 * @return double the gradient at x.
 	 */
 	public double outputFunctionDerivative(double x) {
@@ -98,150 +116,120 @@ public class MNN implements Serializable {
 	 * Computes the output values of the output nodes in the network given input
 	 * values.
 	 * 
-	 * @param x
-	 *            The input values.
+	 * @param input - The input values.
 	 * @return double[] The vector of computed output values
 	 */
-	public double[] BPfeedforward(double[] x) {
-		// compute the activation of each output node (depends on input values)
-		for (int j = 0; j < y.length; j++) {
+	public double[] feedForward(double[] input) {
+
+		// compute neuron values for hidden layer
+		for (int j = 0; j < nodesHidden.length; j++) {
 			double sum = 0; // reset summed activation value
-			for (int i = 0; i < x.length; i++)
-				sum += x[i] * w[j][i];
-			y[j] = outputFunction(sum + bias[j]);
+			for (int i = 0; i < input.length; i++)
+				sum += input[i] * inputWeight[i][j];
+
+			nodesHidden[j] = outputFunction(sum + hiddenBias[j]);
 		}
-		for (int j = 0; j < y1.length; j++) {
-			double sum1 = 0; // reset summed activation value
-			for (int i = 0; i < y.length; i++)
-				sum1 += y[i] * w1[j][i];
-			y1[j] = outputFunction(sum1 + bias1[j]);
+		
+		// compute values for output layer
+		for (int j = 0; j < nodesOutput.length; j++) {
+			double sum = 0;
+			for (int i = 0; i < nodesHidden.length; i++)
+				sum += nodesHidden[i] * hiddenWeight[i][j];
+			
+			nodesOutput[j] = outputFunction(sum + outputBias[j]);
 		}
 
-		return y1;
+		return nodesOutput;
 	}
 
 	/**
 	 * Adapts weights in the network given the specification of which values
 	 * that should appear at the output (target) when the input has been
-	 * presented. The procedure is known as error backpropagation. This
+	 * presented. The procedure is known as error back propagation. This
 	 * implementation is "online" rather than "batched", that is, the change is
 	 * not based on the gradient of the global error, merely the local --
 	 * pattern-specific -- error.
 	 * 
-	 * @param x
-	 *            The input values.
-	 * @param d
-	 *            The desired output values.
-	 * @param eta
-	 *            The learning rate, always between 0 and 1, typically a small
-	 *            value, e.g. 0.1
+	 * @param input - The input values.
+	 * @param desiredOutput - The desired output values.
+	 * @param learningRate - The learning rate, always between 0 and 1,
+	 * 				typically a small value, e.g. 0.1
 	 * @return double An error value (the root-mean-squared-error).
 	 */
-	public double train(double[] x, double[] d1, double eta) 
-	{
+	public double train(double[] input, double[] desiredOutput) {
 
 		// present the input and calculate the outputs
-		BPfeedforward(x);
+		feedForward(input);
 
 		// allocate space for errors of individual nodes
-		double[] error1 = new double[y1.length];
-		double[] error = new double[y.length];
+		double[] errorOutput = new double[nodesOutput.length];
+		double[] errorHidden = new double[nodesHidden.length];
 
-		// compute the error of output nodes (explicit target is available -- so
-		// quite simple)
-		// also, calculate the root-mean-squared-error to indicate progress
-		double rmse1 = 0;
-		for (int j = 0; j < y1.length; j++) 
-		{
-			double diff1 = d1[j] - y1[j];
-			error1[j] = diff1 * outputFunctionDerivative(y1[j]);
-			rmse1 += diff1 * diff1;
+		// calculate output layer errors and record root mean squared error
+		double rmse = 0;
+		for (int j = 0; j < nodesOutput.length; j++) {
+			double diff = desiredOutput[j] - nodesOutput[j];
+			errorOutput[j] = diff * outputFunctionDerivative(nodesOutput[j]);
+			rmse += diff * diff;
 		}
-		rmse1 = Math.sqrt(rmse1 / y1.length);
-
-		for (int j = 0; j < y.length; j++)
-		{
-			double sum = 0;
-			for (int i = 0; i < y1.length; i++)
-			{
-				double diff = error1[i];
-				sum += w1[i][j] * diff;
-			}
-			error[j] = outputFunctionDerivative(y[j]) * sum;
-		}
-
-
-		// change weights according to errors
-
-		for (int j = 0; j < y1.length; j++) {
-			for (int i = 0; i < y.length; i++) {
-				w1[j][i] += error1[j] * y[i] * eta;
-				// TODO: Currently unused
-				//dw1[j][i] = error1[j] * y[i] * eta;
-			}
-			bias1[j] += error1[j] * 1.0 * eta; // bias can be understood as a
-												// weight from a node which is
-												// always 1.0.
-		}
-
-		for (int j = 0; j < y.length; j++)
-		{
-			for (int i = 0; i < x.length; i++)
-			{
-				w[j][i] += error[j] * x[i] * eta;
-			}
-			bias[j] += error[j] * 1.0 * eta; // bias can be understood as a
-			// weight from a node which is
-			// always 1.0.
-		}
-
-
-		// BP
-		/*
 		
-		for (int j = 0; j < y.length; j++) {
-			double diff = 0;
-			for (int i = 0; i < y1.length; i++) {
-				diff = w1[i][j] * error1[i];
-			}
-			error[j] = diff * outputFunctionDerivative(y[j]);
+		rmse = Math.sqrt(rmse / nodesOutput.length);
+
+		// calculate hidden layer errors
+		for (int i = 0; i < nodesHidden.length; i++) {
+			double sum = 0;
+			for (int j = 0; j < nodesOutput.length; j++)
+				sum += hiddenWeight[i][j] * errorOutput[j];
+			
+			errorHidden[i] = outputFunctionDerivative(nodesHidden[i]) * sum;
 		}
 
-		// change weights according to errors
-
-		for (int j = 0; j < y.length; j++) {
-			for (int i = 0; i < x.length; i++) {
-				w[j][i] += error[j] * x[i] * eta;
-				dw[j][i] = error[j] * x[i] * eta;
-			}
-			bias[j] += error[j] * 1.0 * eta; // bias can be understood as a
-												// weight from a node which is
-												// always 1.0.
-		}
-
-		double out, err, dweight;
-
-		// BP adjustweights
-		for (int j = 0; j < y.length; j++) {
-			for (int i = 0; i < x.length; i++) {
-				out = x[i];
-				err = error[j];
-				dweight = dw[j][i];
-				w[j][i] += eta * err * out + 0.9 * dweight;
-				dw[j][i] = eta * err * out;
+		// adjust hidden layer weights and apply momentum
+		for (int i = 0; i < nodesHidden.length; i++) {
+			for (int j = 0; j < nodesOutput.length; j++) {
+				double weight = errorOutput[j] * nodesHidden[i] * learningRate;
+				hiddenWeight[i][j] += weight +
+						MOMENTUM_FACTOR * hiddenWeightChange[i][j];
+				hiddenWeightChange[i][j] = weight;
 			}
 		}
-
-		for (int j = 0; j < y1.length; j++) {
-			for (int i = 0; i < y.length; i++) {
-				out = y[i];
-				err = error1[j];
-				dweight = dw1[j][i];
-				w1[j][i] += eta * err * out + 0.9 * dweight;
-				dw1[j][i] = eta * err * out;
+		
+		// apply output layer bias
+		for (int i = 0; i < nodesOutput.length; i++)
+			outputBias[i] += errorOutput[i] * outputBias[i] * learningRate;
+		
+		// adjust input layer weights
+		for (int i = 0; i < input.length; i++) {
+			for (int j = 0; j < nodesHidden.length; j++) {
+				double weight = errorHidden[j] * input[i] * learningRate;
+				inputWeight[i][j] += weight +
+						MOMENTUM_FACTOR * inputWeightChange[i][j];
+				inputWeightChange[i][j] = weight;
 			}
-		}*/
+		}
+		
+		// apply hidden layer bias
+		for (int i = 0; i < nodesHidden.length; i++)
+			hiddenBias[i] += errorHidden[i] * hiddenBias[i] * learningRate;
 
-		return rmse1;
+		return rmse;
+	}
+	
+	/**
+	 * Backup weight values
+	 */
+	public void saveWeight()
+	{
+		saveHiddenWeight = Arrays.copyOf(inputWeight, inputWeight.length);
+		saveHiddenWeight = Arrays.copyOf(hiddenWeight, hiddenWeight.length);
+	}
+	
+	/**
+	 * Restore weight values
+	 */
+	public void restoreWeight()
+	{
+		inputWeight = Arrays.copyOf(saveInputWeight, saveInputWeight.length);
+		hiddenWeight = Arrays.copyOf(saveHiddenWeight, saveHiddenWeight.length);	
 	}
 }
