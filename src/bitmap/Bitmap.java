@@ -104,6 +104,9 @@ public class Bitmap {
 				}
 			}
 		}
+		else
+			map = tempMap;
+		
 	}
 
 	/**

@@ -55,13 +55,6 @@ public class MNN implements Serializable {
 		inputWeightChange = new double[input][hidden]; // input layer weight momentum
 		hiddenWeightChange = new double[hidden][output]; // hidden layer weight momentum
 
-		System.out.println(" hidden layer:" +
-				"Input :  " + "[" + input + "],  " +
-				"Output : [" + hidden + "]");
-		System.out.println(" Output layer: " +
-				"Input :  [" + hidden + "],  " +
-				"Output : [" + output + "]");
-
 		hiddenBias = new double[hidden];
 		outputBias = new double[output];
 
