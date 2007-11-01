@@ -2,6 +2,7 @@ package bitmap;
 
 import java.util.Random;
 
+import machl.Config;
 import machl.MNN;
 
 public class MNNClassifier extends LetterClassifier {
@@ -70,7 +71,7 @@ public class MNNClassifier extends LetterClassifier {
 	 *            the learning rate
 	 */
 	public MNNClassifier(int nRows, int nCols, double eta) {
-		nn = new MNN(nRows * nCols, getClassCount(), 150, eta);
+		nn = new MNN(nRows * nCols, getClassCount(), Config.HIDDEN_NODES, eta);
 		targets = new double[getClassCount()][getClassCount()];
 		for (int c = 0; c < getClassCount(); c++)
 			targets[c][c] = 1;

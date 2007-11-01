@@ -11,7 +11,7 @@ public class EnsembleClassifier extends LetterClassifier {
 	private static int HYPOTHESES_NUM = 5;
 	
 	// main hypotheses
-	private LetterClassifier[] classifiers;
+	private LetterClassifier[] classifiers = new LetterClassifier[HYPOTHESES_NUM];
 	public double rmse;
 
 	public String getName() {
@@ -73,10 +73,13 @@ public class EnsembleClassifier extends LetterClassifier {
 			switch (type) {
 			case MNN:
 				classifiers[i] = new MNNClassifier(nRows, nCols, Config.LEARNING_RATE);
+				break;
 			case NN1:
 				classifiers[i] = new NNClassifier(nRows, nCols);
+				break;
 			case ID3:
 				classifiers[i] = new ID3Classifier(nRows, nCols);
+				break;
 			}
 	}
 }
