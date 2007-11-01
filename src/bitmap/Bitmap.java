@@ -97,16 +97,15 @@ public class Bitmap {
 			//System.out.println(top + "--" + bottom + "--" + left + "--" + right);
 			//System.out.println(adjustX + "--" + adjustY);
 	
-			for (int x = right; x >= left; x--) {
-				for (int y = bottom; y >= top; y--) {
-					if (tempMap[x][y])
-						map[y + adjustY][x + adjustX] = true;
+			for (int r = top; r <= bottom; r++) {
+				for (int c = left; c <= right; c++) {
+					if (tempMap[r][c])
+						map[r + adjustY][c + adjustX] = true;
 				}
 			}
 		}
 		else
 			map = tempMap;
-		
 	}
 
 	/**
