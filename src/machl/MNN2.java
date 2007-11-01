@@ -59,14 +59,16 @@ public class MNN2 implements Serializable {
 			for (int i = 0; i < input; i++)
 				inputWeight[i][j] = rand.nextGaussian() * .1;
 			// TODO: experiment with +1/-1
-			hiddenBias[j] = rand.nextGaussian() * .1;
+			//hiddenBias[j] = rand.nextGaussian() * .1;
+			hiddenBias[j] = 1;
 		}
 
 		// initialise weight for hidden nodes, and bias for output nodes
 		for (int j = 0; j < output; j++) {
 			for (int i = 0; i < hidden; i++)
 				hiddenWeight[i][j] = rand.nextGaussian() * .1;
-			outputBias[j] = rand.nextGaussian() * .1;
+			//outputBias[j] = rand.nextGaussian() * .1;
+			hiddenBias[j] = 1;
 		}
 		
 		this.learningRate = eta;
@@ -160,8 +162,8 @@ public class MNN2 implements Serializable {
 		}
 		
 		// TODO: square root seems expensive?
-		//rmse = rmse / nodesOutput.length;
-		rmse = Math.sqrt(rmse / nodesOutput.length);
+		rmse = rmse / nodesOutput.length;
+		//rmse = Math.sqrt(rmse / nodesOutput.length);
 
 		// calculate hidden layer errors
 		for (int i = 0; i < nodesHidden.length; i++) {

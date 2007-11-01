@@ -17,9 +17,6 @@ import java.util.Vector;
 
 public class LetterClassifier extends Classifier {
 
-	/**
-	 * 
-	 */
 	private static final long serialVersionUID = -4814763070665023677L;
 	private static String name = "Letter Classifier";
 	private static int nClasses = ('Z' - 'A') + 1;

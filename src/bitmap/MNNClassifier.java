@@ -3,17 +3,15 @@ package bitmap;
 import java.util.Random;
 import java.util.Vector;
 
-import machl.MNN;
 import machl.MNN2;
 
 public class MNNClassifier extends LetterClassifier {
-	/**
-	 * 
-	 */
+
 	private static final long serialVersionUID = 881205967028950511L;
 	private static String name = "MNN Classifier ";
 	private MNN2 nn = null;
 	private double[][] targets = null;
+	public double rmse;
 
 	/**
 	 * Identifies the classifier, e.g. by the name of the author/contender, or
@@ -51,7 +49,7 @@ public class MNNClassifier extends LetterClassifier {
 		Random rand = new Random();
 		for (int p = 0; p < epochs; p++) {
 			int sample = rand.nextInt(bitmaps.size());
-			nn.train((bitmaps.get(sample)).toDoubleArray(),
+			rmse = nn.train((bitmaps.get(sample)).toDoubleArray(),
 					targets[bitmaps.get(sample).getTarget()]);
 		}
 	}
