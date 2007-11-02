@@ -27,6 +27,12 @@ public class Config {
 	// Enable over-training detection by monitoring RMSE
 	public static boolean DETECT_OVERTRAINING = true;
 	
+	// Enable momentum in multi-layer neural network
+	public static boolean ENABLE_MOMENTUM = true;
+	
+	// Number of hypotheses to generate for Ensemble
+	public static int HYPOTHESES_NUM = 5;
+	
 	// Whether to print debug messages
 	public static boolean PRINT_DEBUG = false;
 }

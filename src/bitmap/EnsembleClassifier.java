@@ -8,10 +8,9 @@ public class EnsembleClassifier extends LetterClassifier {
 	
 	private static final long serialVersionUID = -5948422250919616033L;
 	private static String name = "Ensemble Classifier ";
-	private static int HYPOTHESES_NUM = 5;
 	
 	// main hypotheses
-	private LetterClassifier[] classifiers = new LetterClassifier[HYPOTHESES_NUM];
+	private LetterClassifier[] classifiers = new LetterClassifier[Config.HYPOTHESES_NUM];
 	public double rmse;
 
 	public String getName() {
@@ -69,7 +68,7 @@ public class EnsembleClassifier extends LetterClassifier {
 	public EnsembleClassifier(ClassifierType type, int nRows, int nCols) {
 		
 		// initial hypothesis
-		for (int i = 0; i < HYPOTHESES_NUM; i++)
+		for (int i = 0; i < Config.HYPOTHESES_NUM; i++)
 			switch (type) {
 			case MNN:
 				classifiers[i] = new MNNClassifier(nRows, nCols, Config.LEARNING_RATE);

@@ -25,7 +25,11 @@ public class ClassifiedBitmap extends Bitmap {
 	public ClassifiedBitmap(String spec) {
 		super(spec);
 		try {
-			targetClass = Integer.parseInt(spec.substring(spec.lastIndexOf(" ") + 1));
+			String num = spec.substring(spec.lastIndexOf(" ") + 1);
+			// ignore new line character after last space
+			if (num.equals(""))
+				return;
+			targetClass = Integer.parseInt(num);
 		} catch (NumberFormatException ex) {
 			throw new RuntimeException(
 					"Classification of bitmap is not correctly specified: " + spec);

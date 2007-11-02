@@ -15,7 +15,8 @@ public class TestClassify {
 	 */
 	public static void main(String[] args) throws Exception {
 		
-		for (int j = 0; j < 5; j++) {
+		// multiple runs
+		for (int j = 0; j < 1; j++) {
 
 			// create a new classifier and load bitmaps for file
 			MNNClassifier mc = new MNNClassifier(32, 32, Config.LEARNING_RATE);
@@ -54,11 +55,11 @@ public class TestClassify {
 				}				
 	
 				// check how our classifier performs on both sets
-				//System.out.println("Training results:");
-				//new EvalClassifier(mc, bitmaps).run();
+				System.out.println("Training results:");
+				new EvalClassifier(mc, bitmaps).run();
 	
-				//System.out.println("Evaluation results:");
-				//new EvalClassifier(mc, testbitmaps).run();
+				System.out.println("Evaluation results:");
+				new EvalClassifier(mc, testbitmaps).run();
 			}
 	
 			// finish training. run final evaluation
@@ -69,6 +70,8 @@ public class TestClassify {
 	
 			System.out.println("Evaluation results:");
 			new EvalClassifier(mc, testbitmaps).run();
+			
+			bitmap.Classifier.save(mc, "Classifier");
 		}
 
 	}

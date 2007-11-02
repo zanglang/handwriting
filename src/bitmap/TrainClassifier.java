@@ -2,6 +2,8 @@ package bitmap;
 
 import java.io.IOException;
 
+import machl.Config;
+
 /**
  * This program trains a classifier and saves it in a file to be read when used.
  * 
@@ -67,7 +69,7 @@ public class TrainClassifier {
 		}
 	}
 
-	public void tenFoldValidation(String[] args) {
+	public static void tenFoldValidation(String[] args) {
 		// 10-fold cross validation
 		ClassifiedBitmap[] Trainmaps = new ClassifiedBitmap[900];
 		ClassifiedBitmap[] Testmaps = new ClassifiedBitmap[100];
@@ -80,7 +82,7 @@ public class TrainClassifier {
 		
 		for (int i = 0; i < 10; i++) // 10- fold cross validation
 		{
-			Mc = new MNNClassifier(32, 32, 0.1);
+			Mc = new MNNClassifier(32, 32, Config.LEARNING_RATE);
 			try {
 				tempmaps = LetterClassifier.loadLetters(args[1]); // load data
 			} catch (IOException ex) {
@@ -105,7 +107,7 @@ public class TrainClassifier {
 
 			}
 			System.out.println(" n =" + n);
-			Mc.train(Trainmaps, 100000);
+			Mc.train(Trainmaps, Config.EPOCHS);
 			Rmses[i] = new EvalClassifier(Mc, Testmaps).run();
 			System.out.println("Test " + i + " completed !");
 			AvgRmse += Rmses[i];
@@ -124,7 +126,8 @@ public class TrainClassifier {
 			System.exit(1);
 		}
 		// new TrainClassifier(args);
-		MNNTrainClassifier(args);
+		//MNNTrainClassifier(args);
+		tenFoldValidation(args);
 		System.out.println("Done.");
 	}
 

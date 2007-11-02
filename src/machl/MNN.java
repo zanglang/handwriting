@@ -195,9 +195,14 @@ public class MNN implements Serializable {
 		for (int i = 0; i < input.length; i++) {
 			for (int j = 0; j < nodesHidden.length; j++) {
 				double weight = errorHidden[j] * input[i] * learningRate;
-				inputWeight[i][j] += weight +
-						MOMENTUM_FACTOR * inputWeightChange[i][j];
-				inputWeightChange[i][j] = weight;
+				if (Config.ENABLE_MOMENTUM) {				
+					inputWeight[i][j] += weight +
+							MOMENTUM_FACTOR * inputWeightChange[i][j];
+					inputWeightChange[i][j] = weight;
+				}
+				else {
+					inputWeight[i][j] += weight;
+				}
 			}
 		}
 		
